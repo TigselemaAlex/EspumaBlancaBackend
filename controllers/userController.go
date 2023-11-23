@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"EspumaBlancaBackend/initializers"
+	"EspumaBlancaBackend/config"
 	"EspumaBlancaBackend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -12,6 +12,7 @@ import (
 )
 
 func Signup(c *gin.Context) {
+	var db = config.DatabaseConnection()
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -32,7 +33,7 @@ func Signup(c *gin.Context) {
 	}
 
 	user := models.User{Email: body.Email, Password: string(password)}
-	result := initializers.DB.Create(&user)
+	result := db.Create(&user)
 
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -47,6 +48,7 @@ func Signup(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
+	var db = config.DatabaseConnection()
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -58,7 +60,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	var user models.User
-	initializers.DB.Where("email = ?", body.Email).First(&user)
+	db.Where("email = ?", body.Email).First(&user)
 	if user.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid email",
